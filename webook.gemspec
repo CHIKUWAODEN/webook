@@ -6,8 +6,8 @@ require 'webook/version'
 Gem::Specification.new do |spec|
   spec.name          = "webook"
   spec.version       = Webook::VERSION
-  spec.authors       = ["yandersen"]
-  spec.email         = ["Write your email address"]
+  spec.authors       = ["kandayasu"]
+  spec.email         = ["yasuhiro.kanda@gmail.com"]
   spec.description   = %q{Write a gem description}
   spec.summary       = %q{Write a gem summary}
   spec.homepage      = ""
