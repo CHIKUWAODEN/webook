@@ -14,6 +14,12 @@ module Webook
     end
 
     def build (config)
+      # create directory
+      [ config.tmp_dir(), config.out_dir() ].each do |dir|
+        status, stdout, stderr = systemu "mkdir #{dir}"
+        puts [ status, stdout, stderr ]
+      end
+
       # Convert source files to HTML
       @temp_files = []
       config.source().each { |src|
