@@ -27,12 +27,19 @@ module Webook
         ext = File.extname src
 
         if (ext == '.md') or (ext == '.markdown')
-          doc = Kramdown::Document.new(
+          # Markdown ERB processing
+          echo "ERB"
+          erb = ERB.new(
             File.read(
               src,
               :encoding => Encoding::UTF_8
             )
           )
+
+          echo "Markdown"
+          doc = Kramdown::Document.new(erb.result(binding))
+
+
           ext_path = "#{config.tmp_dir()}/_#{File.basename src, ext}.html"
           File.open(ext_path, 'w') { |file|
             file.write doc.to_html
@@ -42,6 +49,7 @@ module Webook
       }
 
 
+      echo "combine all HTML files"
       marge = []
       html = @temp_files.each do |file|
         marge << File.read(
@@ -50,6 +58,8 @@ module Webook
         )
       end
       content = marge.join ''
+
+      echo "ERB"
       html = ERB.new(
         File.read(
           config.template,
