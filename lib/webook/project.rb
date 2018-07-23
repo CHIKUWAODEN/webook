@@ -46,6 +46,7 @@ module Webook
     <head>
       <!-- For web browser -->
       <link rel="stylesheet" type="text/css" href="../src/stylesheet.css">
+      <link href="https://fonts.googleapis.com/earlyaccess/sawarabimincho.css" rel="stylesheet" />
       <!-- For web browser -->
 
       <meta charset="UTF-8" />
@@ -152,10 +153,14 @@ module Webook
   EOS
 
   DEFAULT_PROJECT_STYLESHEET = ~<<-EOS unless defined? DEFAULT_PROJECT_STYLESHEET
+  @import url(https://fonts.googleapis.com/earlyaccess/sawarabimincho.css);
+  @import url(https://fonts.googleapis.com/earlyaccess/notosansjapanese.css);
+
+  
   * {
     vertical-align: bottom;
     line-height: 200%;
-    font-family: 'Lucida Grande', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', Meiryo, メイリオ, sans-serif;
+    font-family: "Sawarabi Mincho", 'Lucida Grande', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', Meiryo, メイリオ, sans-serif;
   }
 
   body.main   { width: 100%; }
@@ -173,12 +178,23 @@ module Webook
   body.main h1 {
     page-break-before: left;
     border-bottom: 0.5mm solid #0000ff;
-  }
+}
 
   body.main h2 {
     border-left : 10pt solid #0000ee;
     padding-left : 10pt;
   }
+
+
+  body.main h1,
+  body.main h2,
+  body.main h3,
+  body.main h4,
+  body.main h5,
+  body.main h6 {
+    font-family: "Noto Sans Japanese";
+  }
+
 
   body.main img {
     max-width: 100%;
@@ -228,6 +244,18 @@ module Webook
     padding-left: 2mm;
     padding-right: 2mm;
   }
+
+  /* footnote */
+  span.footnote {
+    float: footnote;
+    counter-increment: footnote;
+  }
+
+  span.footnote::footnote-call,
+  span.footnote::footnote-maker {
+    content: '[' counter(footnote) ']';
+  }
+
   EOS
 
   DEFAULT_PROJECT_SOURCE_PRE = ~<<-EOS unless defined? DEFAULT_PROJECT_SOURCE_PRE
