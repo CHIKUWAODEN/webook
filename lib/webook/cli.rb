@@ -4,6 +4,7 @@ require 'webook'
 require 'webook/core'
 require 'webook/project'
 require 'webook/config'
+require 'webook/version'
 require 'thor'
 
 
@@ -27,6 +28,12 @@ module Webook
       say "[Webook] Create Webook project, name: #{name}", :green
       Webook::Project.new().generate name
       say "[Webook] Project has been created", :green
+    end
+
+
+    desc "version", "Put version number to stdout"
+    def version()
+      say "webook vesion #{Webook::VERSION}"
     end
   end
 end
