@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "thor"
   spec.add_development_dependency "systemu"
+  spec.add_development_dependency "etc"
   spec.add_development_dependency "kramdown"
   spec.add_development_dependency "RedCloth"
 end
