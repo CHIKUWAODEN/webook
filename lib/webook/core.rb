@@ -28,7 +28,7 @@ module Webook
 
         if (ext == '.md') or (ext == '.markdown')
           # Markdown ERB processing
-          echo "ERB"
+          puts "ERB"
           erb = ERB.new(
             File.read(
               src,
@@ -36,7 +36,7 @@ module Webook
             )
           )
 
-          echo "Markdown"
+          puts "Markdown"
           doc = Kramdown::Document.new(erb.result(binding))
 
 
@@ -49,7 +49,7 @@ module Webook
       }
 
 
-      echo "combine all HTML files"
+      puts "combine all HTML files"
       marge = []
       html = @temp_files.each do |file|
         marge << File.read(
@@ -59,7 +59,7 @@ module Webook
       end
       content = marge.join ''
 
-      echo "ERB"
+      puts "ERB"
       html = ERB.new(
         File.read(
           config.template,
