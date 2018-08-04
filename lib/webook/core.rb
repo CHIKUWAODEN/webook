@@ -85,6 +85,17 @@ module Webook
       status, stdout, stderr = systemu command
       puts [ status, stdout, stderr ]
 
+
+      # Google Chrome を Headless モードで起動してプリントアウトする
+      command = "google-chrome --headless --disable-gpu --print-to-pdf=\"#{config.out_dir}/#{config.title}_chrome.pdf\" #{config.out_dir}/#{config.title}.html"
+      puts command
+      status, stdout, stderr = systemu command
+      puts [ status, stdout, stderr ]
+
+
+      # viola-savepdf
+      command = "savepdf -s JIS-B5 -o \"#{config.out_dir}/#{config.title}_viola.pdf\" \"#{config.out_dir}/#{config.title}.html\""
+
       # End server
       server.end_server()
     end
