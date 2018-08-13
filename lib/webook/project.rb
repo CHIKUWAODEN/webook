@@ -35,6 +35,7 @@ module Webook
     "template" : "template/default.erb",
     "header"   : "template/header.html",
     "footer"   : "template/footer.html",
+    "helper"   : "template/erb_helper.rb",
     "out_dir"  : "output",
     "tmp_dir"  : "tmp"
   }
@@ -46,7 +47,6 @@ module Webook
     <head>
       <!-- For web browser -->
       <link rel="stylesheet" type="text/css" href="../src/stylesheet.css">
-      <link href="https://fonts.googleapis.com/earlyaccess/sawarabimincho.css" rel="stylesheet" />
       <!-- For web browser -->
 
       <meta charset="UTF-8" />
@@ -137,7 +137,7 @@ module Webook
         body { width: 100%; border:0; }
         div { padding-top: 5mm; }
         table { border-top: 1px dashed black; width: 100% }
-        td { text-align: right; padding-top: 2mm; }
+        td { text-align: right; padding-top: 2mm; padding-right: 10mm; }
       </style>
     </head>
     <body onload="subst();">
@@ -150,6 +150,69 @@ module Webook
       </div>
     </body>
   </html>
+  EOS
+
+  DEFAULT_TOC_FILE = ~<<-EOS unless defined? DEFAULT_TOC_FILE
+  <?xml version="1.0" encoding="UTF-8"?>
+  <xsl:stylesheet version="2.0"
+                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                  xmlns:outline="http://wkhtmltopdf.org/outline"
+                  xmlns="http://www.w3.org/1999/xhtml">
+    <xsl:output doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"
+                doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
+                indent="yes" />
+    <xsl:template match="outline:outline">
+      <html>
+        <head>
+          <title>目次</title>
+          <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+          <style>
+            h1 {
+              text-align: center;
+              font-size: 32pt;
+              font-family: arial;
+            }
+            div {border-bottom: 1px dashed rgb(200,200,200);}
+            span {float: right; font-size: 14pt;}
+            li {list-style: none; line-height: 200%; }
+            ul {
+              font-size: 14pt;
+              font-family: arial;
+            }
+            ul {padding-left: 0em;}
+            ul ul {padding-left: 1em;}
+            a {text-decoration:none; color: black;}
+          </style>
+        </head>
+        <body>
+          <h1>目次</h1>
+          <ul><xsl:apply-templates select="outline:item/outline:item"/></ul>
+        </body>
+      </html>
+    </xsl:template>
+    <xsl:template match="outline:item">
+      <li>
+        <xsl:if test="@title!=''">
+          <div>
+            <a>
+              <xsl:if test="@link">
+                <xsl:attribute name="href"><xsl:value-of select="@link"/></xsl:attribute>
+              </xsl:if>
+              <xsl:if test="@backLink">
+                <xsl:attribute name="name"><xsl:value-of select="@backLink"/></xsl:attribute>
+              </xsl:if>
+              <xsl:value-of select="@title" /> 
+            </a>
+            <span> <xsl:value-of select="@page" /> </span>
+          </div>
+        </xsl:if>
+        <ul>
+          <xsl:comment>added to prevent self-closing tags in QtXmlPatterns</xsl:comment>
+          <xsl:apply-templates select="outline:item"/>
+        </ul>
+      </li>
+    </xsl:template>
+  </xsl:stylesheet>
   EOS
 
   DEFAULT_PROJECT_STYLESHEET = ~<<-EOS unless defined? DEFAULT_PROJECT_STYLESHEET
@@ -278,6 +341,12 @@ module Webook
 
   Postscript of the book.
   EOS
+
+  DEFAULT_ERB_HELPER = ~<<-EOS unless defined? DEFAULT_ERB_HELPER
+  def hello(name)
+    "Hello, #{name}!!"
+  end
+  EOS
 end
 
 
@@ -329,6 +398,12 @@ module Webook
         },{
           'path' => "#{root}/template/footer.html",
           'content' => Webook::DEFAULT_PAGE_FOOTER 
+        },{
+          'path' => "#{root}/template/toc.xsl",
+          'content' => Webook::DEFAULT_TOC_FILE,
+        }, {
+          'path' => "#{root}/template/erb_helper.rb",
+          'content' => Webook::DEFAULT_ERB_HELPER,
         }
       ]
       teplates.each do |template|

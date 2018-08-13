@@ -1,3 +1,8 @@
+def hello(name)
+    "Hello, #{name}!!"
+end
+
+
 def pagebreak()
-    '<p class="pagebreak">'
+    '<div class="pagebreak">&nbsp;</div>'
 end
