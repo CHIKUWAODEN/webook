@@ -35,6 +35,7 @@ module Webook
     "template" : "template/default.erb",
     "header"   : "template/header.html",
     "footer"   : "template/footer.html",
+    "helper"   : "template/erb_helper.rb",
     "out_dir"  : "output",
     "tmp_dir"  : "tmp"
   }
@@ -136,7 +137,7 @@ module Webook
         body { width: 100%; border:0; }
         div { padding-top: 5mm; }
         table { border-top: 1px dashed black; width: 100% }
-        td { text-align: right; padding-top: 2mm; }
+        td { text-align: right; padding-top: 2mm; padding-right: 10mm; }
       </style>
     </head>
     <body onload="subst();">
@@ -151,11 +152,170 @@ module Webook
   </html>
   EOS
 
+  DEFAULT_TOC_FILE = ~<<-EOS unless defined? DEFAULT_TOC_FILE
+  <?xml version="1.0" encoding="UTF-8"?>
+  <xsl:stylesheet version="2.0"
+                  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                  xmlns:outline="http://wkhtmltopdf.org/outline"
+                  xmlns="http://www.w3.org/1999/xhtml">
+    <xsl:output doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"
+                doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
+                indent="yes" />
+    <xsl:template match="outline:outline">
+      <html>
+        <head>
+          <title>目次</title>
+          <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+          <style>
+            h1 {
+              text-align: center;
+              font-size: 32pt;
+              font-family: arial;
+            }
+            div {border-bottom: 1px dashed rgb(200,200,200);}
+            span {float: right; font-size: 14pt;}
+            li {list-style: none; line-height: 200%; }
+            ul {
+              font-size: 14pt;
+              font-family: arial;
+            }
+            ul {padding-left: 0em;}
+            ul ul {padding-left: 1em;}
+            a {text-decoration:none; color: black;}
+          </style>
+        </head>
+        <body>
+          <h1>目次</h1>
+          <ul><xsl:apply-templates select="outline:item/outline:item"/></ul>
+        </body>
+      </html>
+    </xsl:template>
+    <xsl:template match="outline:item">
+      <li>
+        <xsl:if test="@title!=''">
+          <div>
+            <a>
+              <xsl:if test="@link">
+                <xsl:attribute name="href"><xsl:value-of select="@link"/></xsl:attribute>
+              </xsl:if>
+              <xsl:if test="@backLink">
+                <xsl:attribute name="name"><xsl:value-of select="@backLink"/></xsl:attribute>
+              </xsl:if>
+              <xsl:value-of select="@title" /> 
+            </a>
+            <span> <xsl:value-of select="@page" /> </span>
+          </div>
+        </xsl:if>
+        <ul>
+          <xsl:comment>added to prevent self-closing tags in QtXmlPatterns</xsl:comment>
+          <xsl:apply-templates select="outline:item"/>
+        </ul>
+      </li>
+    </xsl:template>
+  </xsl:stylesheet>
+  EOS
+
   DEFAULT_PROJECT_STYLESHEET = ~<<-EOS unless defined? DEFAULT_PROJECT_STYLESHEET
+  @import url('https://fonts.googleapis.com/css?family=Source+Code+Pro');
+  @import url(https://fonts.googleapis.com/earlyaccess/sawarabimincho.css);
+  @import url(https://fonts.googleapis.com/earlyaccess/notosansjapanese.css);
+
+
+  /* footnote */
+  span.footnote {
+    float: footnote;
+    counter-increment: footnote;
+  }
+
+  span.footnote::footnote-call,
+  span.footnote::footnote-maker {
+    content: '[' counter(footnote) ']';
+  }
+
+
+
+
+
+  body {
+    filter: grayscale(100%);
+    margin: 0mm;
+  }
+  
+  body.main {
+    font-size: 14pt;
+  }
+  body.main p {
+    font-size: 14pt;
+    line-height: 200%;
+    letter-spacing: 110%;
+  }
+  
+  
+  body.main blockquote {
+    font-style: italic;
+  }
+  
+  div.right-justify {
+    text-align: right;
+  }
+  
+  
+  /* 定義リスト用 */
+  dl > dt {
+    font-weight: bold;
+    font-family: "Noto Sans Japanese";
+  }
+  dl > dd {
+    font-weight: normal;
+    font-family: "Sawarabi Mincho";
+  }
+  
+
+
+
+  /* 章や節に自動的に番号をふる */
+  body {
+    counter-reset: chapter section subsection;
+  }
+  h1.counting { counter-reset: section subsection figcount; }
+  h2.counting { counter-reset: subsection; }
+  
+  h1.counting:before {
+    counter-increment: chapter;
+    content: "第" counter(chapter) "章 ";
+  }
+  h2.counting:before {
+    counter-increment: section;
+    content: counter(chapter) "." counter(section) ". ";
+  }
+  h3.counting:before {
+    counter-increment: subsection;
+    content: counter(chapter) "." counter(section) "." counter(subsection) ". ";
+  }
+  
+  /* 画像に自動的に番号をふる */
+  figure {
+    text-align: center;
+  }
+  figure > img {
+    counter-increment: figcount;
+  }
+  figure > figcaption {
+    display: inline;
+  }
+  figure > figcaption::before {
+    content: "図" counter(chapter) "." counter(figcount)
+  }
+  
+
+
+
+  
+
   * {
     vertical-align: bottom;
     line-height: 200%;
-    font-family: 'Lucida Grande', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', Meiryo, メイリオ, sans-serif;
+    font-family: "Sawarabi Mincho", 'Lucida Grande', 'Hiragino Kaku Gothic ProN', 'ヒラギノ角ゴ ProN W3', Meiryo, メイリオ, sans-serif;
   }
 
   body.main   { width: 100%; }
@@ -163,6 +323,9 @@ module Webook
 
   body.main p.pagebreak {
     page-break-after: always;
+    height:  1px;
+    padding: 0px;
+    margin: 0px;
   }
 
   body.main br {
@@ -170,10 +333,29 @@ module Webook
     page-break-before: always;
   }
 
+
+  /* headers */
+
+  body.main h1 { font-size: 28pt; }
+  body.main h2 { font-size: 24pt; }
+  body.main h3 { font-size: 20pt; }
+  body.main h4 { font-size: 16pt; }
+  body.main h5 { font-size: 16pt; }
+  body.main h6 { font-size: 16pt; }
+
+  body.main h1,
+  body.main h2,
+  body.main h3,
+  body.main h4,
+  body.main h5,
+  body.main h6 {
+    font-family: "Noto Sans Japanese";
+  }
+
   body.main h1 {
     page-break-before: left;
     border-bottom: 0.5mm solid #0000ff;
-  }
+}
 
   body.main h2 {
     border-left : 10pt solid #0000ee;
@@ -202,31 +384,26 @@ module Webook
     border: 1px solid #000000;
   }
 
+
   body.main pre {
-    font-size: 10pt;
-    background-color: #EFEFEF;
-    border: 1px solid #888888;
-    -webkit-border-radius: 5mm;
     padding: 5mm;
-    overflow-wrap: normal;
+    background-color: #EFEFEF;
   }
 
   body.main pre > code {
-    padding 
-    overflow-wrap: normal;
-    font-family: 'Courier', sans-serif;
-    font-weight: 900;
+    padding: 1mm;
+    font-family: 'Source Code Pro', monospace;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
   }
 
 
   body.main p > code {
-    font-family: 'Courier', sans-serif;
+    font-family: 'Source Code Pro', monospace;
     font-weight: 900;
-    -webkit-border-radius: 2mm;
-    border: 1px solid #888888;
     padding: 1mm;
     padding-left: 2mm;
-    padding-right: 2mm;
+    padding-right: 2mm;  
   }
   EOS
 
@@ -249,6 +426,12 @@ module Webook
   ======
 
   Postscript of the book.
+  EOS
+
+  DEFAULT_ERB_HELPER = ~<<-EOS unless defined? DEFAULT_ERB_HELPER
+  def hello(name)
+    "Hello, #{name}!!"
+  end
   EOS
 end
 
@@ -301,6 +484,12 @@ module Webook
         },{
           'path' => "#{root}/template/footer.html",
           'content' => Webook::DEFAULT_PAGE_FOOTER 
+        },{
+          'path' => "#{root}/template/toc.xsl",
+          'content' => Webook::DEFAULT_TOC_FILE,
+        }, {
+          'path' => "#{root}/template/erb_helper.rb",
+          'content' => Webook::DEFAULT_ERB_HELPER,
         }
       ]
       teplates.each do |template|

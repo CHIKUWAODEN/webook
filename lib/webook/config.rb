@@ -54,6 +54,10 @@ module Webook
       "#{@directory}/#{@json['template']}"
     end
   
+    def helper
+      "#{@directory}/#{@json['helper']}"
+    end
+
     def tmp_dir
       "#{@directory}/#{@json['tmp_dir']}"
     end
